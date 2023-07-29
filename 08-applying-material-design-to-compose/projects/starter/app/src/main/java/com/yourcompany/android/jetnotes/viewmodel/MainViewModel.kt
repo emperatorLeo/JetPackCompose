@@ -38,6 +38,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.yourcompany.android.jetnotes.data.repository.Repository
+import com.yourcompany.android.jetnotes.domain.model.ColorModel
 import com.yourcompany.android.jetnotes.domain.model.NoteModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -55,19 +56,26 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
     repository.getAllNotesNotInTrash().asLiveData()
   }
 
+  private var _noteEntry = MutableStateFlow<NoteModel>(NoteModel())
+  val noteEntry: LiveData<NoteModel> = _noteEntry.asLiveData()
+
   val notesInTrash: LiveData<List<NoteModel>> by lazy {
     repository.getAllNotesInTrash().asLiveData()
+  }
+
+  val colors: LiveData<List<ColorModel>> by lazy {
+    repository.getAllColors().asLiveData()
   }
 
   private var _selectedNotes = MutableStateFlow<List<NoteModel>>(listOf())
   val selectedNotes: LiveData<List<NoteModel>> = _selectedNotes.asLiveData()
 
   fun onCreateNewNoteClick() {
-    // TODO - Open SaveNoteScreen
+    _noteEntry.value = NoteModel()
   }
 
   fun onNoteClick(note: NoteModel) {
-    // TODO - Open SaveNoteScreen in Edit mode
+    _noteEntry.value = note
   }
 
   fun onNoteCheckedChange(note: NoteModel) {
@@ -101,6 +109,26 @@ class MainViewModel(private val repository: Repository) : ViewModel() {
       withContext(Dispatchers.Main) {
         _selectedNotes.value = listOf()
       }
+    }
+  }
+
+  fun onNoteEntryChange(note: NoteModel){
+    _noteEntry.value = note
+  }
+
+  fun saveNote(note: NoteModel) {
+    viewModelScope.launch(Dispatchers.Default) {
+      repository.insertNote(note)
+
+      withContext(Dispatchers.Main){
+        _noteEntry.value = NoteModel()
+      }
+    }
+  }
+
+  fun moveNoteTrash(note: NoteModel){
+    viewModelScope.launch(Dispatchers.Default) {
+      repository.moveNoteToTrash(note.id)
     }
   }
 }

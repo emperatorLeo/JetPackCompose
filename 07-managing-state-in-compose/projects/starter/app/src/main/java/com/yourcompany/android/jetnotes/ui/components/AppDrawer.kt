@@ -33,6 +33,7 @@
  */
 package com.yourcompany.android.jetnotes.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -194,6 +195,7 @@ fun AppDrawer(
   currentScreen: Screen,
   onScreenSelected: (Screen) -> Unit
 ) {
+  Log.d("Leo","AppDrawer")
   Column(modifier = Modifier.fillMaxSize()) {
     AppDrawerHeader()
 
